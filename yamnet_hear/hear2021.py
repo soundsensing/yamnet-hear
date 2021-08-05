@@ -10,7 +10,6 @@ HOP_SIZE_TIMESTAMPS = 0.050 # <50 ms recommended
 HOP_SIZE_SCENE = 0.5
 EMBEDDING_SIZE = 1024
 
-import openl3
 import numpy
 import tensorflow as tf
 import tensorflow_hub as hub
