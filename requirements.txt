@@ -1,4 +1,4 @@
-openl3==0.4.1
 tensorflow-datasets==4.3.0
 tensorflow==2.4.2
 hearvalidator==2021.0.2
+tensorflow-hub==0.12.0

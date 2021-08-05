@@ -8,10 +8,12 @@ https://neuralaudio.ai/hear2021-holistic-evaluation-of-audio-representations.htm
 
 HOP_SIZE_TIMESTAMPS = 0.050 # <50 ms recommended
 HOP_SIZE_SCENE = 0.5
+EMBEDDING_SIZE = 1024
 
 import openl3
 import numpy
 import tensorflow as tf
+import tensorflow_hub as hub
 
 #import tensorflow_datasets
 #from tensorflow_datasets.typing import Tensor
@@ -20,25 +22,19 @@ from typing import NewType, Tuple
 Tensor = NewType('Tensor', object)
 
 class Model(tf.Module):
-    def __init__(self, model, sample_rate=16000, embedding_size=512):
+    def __init__(self, model, sample_rate=16000, embedding_size=EMBEDDING_SIZE):
         self.sample_rate = sample_rate
         self.scene_embedding_size = embedding_size
         self.timestamp_embedding_size = embedding_size
 
-        self.openl3_model = model # the OpenL3 model instance    
+        self.yamnet_model = model # the YAMNET model instance    
 
 
 def load_model(model_file_path: str) -> Model:
     # FIXME: respect model_file_path
 
-    embedding_size = 512
-
-    openl3_model = openl3.models.load_audio_embedding_model(input_repr="mel256",
-                            content_type="music",
-                            embedding_size=embedding_size,
-    )
-
-    model = Model(model=openl3_model, embedding_size=embedding_size)
+    yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')
+    model = Model(model=yamnet_model)
     return model
 
 TimestampedEmbeddings = Tuple[Tensor, Tensor]
@@ -62,15 +58,10 @@ def get_timestamp_embeddings(
 
     # get embeddings for a single audio clip
     def get_embedding(samples):
-        emb, ts = openl3.get_audio_embedding(samples,
-            sr=model.sample_rate,
-            model=model.openl3_model,
-            hop_size=hop_size,
-            center=True,
-            verbose=0,
-        )
+        scores, embeddings, spectrogram = model.yamnet_model(samples)
 
-        return emb, ts
+        ts = numpy.arange(embeddings.shape[0])*hop_size
+        return embeddings, ts
 
     # Compute embeddings for each clip
     embeddings = []
