@@ -30,7 +30,11 @@ setup(
     version=version,
     long_description=read_readme(),
     long_description_content_type="text/markdown",
-    packages=['yamnet_hear'],
+    packages=['yamnet_hear', 'yamnet'],
     install_requires=read_requirements(),
-    zip_safe=True,
+    include_package_data=True,
+    package_data = {
+        '': ['*.h5', '*.csv', '*.json'],
+    },
+    zip_safe=False,
 )

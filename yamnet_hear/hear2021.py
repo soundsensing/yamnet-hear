@@ -9,10 +9,12 @@ https://neuralaudio.ai/hear2021-holistic-evaluation-of-audio-representations.htm
 HOP_SIZE_TIMESTAMPS = 0.050 # <50 ms recommended
 HOP_SIZE_SCENE = 0.5
 EMBEDDING_SIZE = 1024
+WINDOW_LENGTH = 0.960
 
 import numpy
 import tensorflow as tf
-import tensorflow_hub as hub
+
+import yamnet.inference
 
 #import tensorflow_datasets
 #from tensorflow_datasets.typing import Tensor
@@ -30,10 +32,10 @@ class Model(tf.Module):
 
 
 def load_model(model_file_path: str) -> Model:
+   
     # FIXME: respect model_file_path
 
-    yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')
-    model = Model(model=yamnet_model)
+    model = Model(yamnet.inference.Model())
     return model
 
 TimestampedEmbeddings = Tuple[Tensor, Tensor]
@@ -55,9 +57,22 @@ def get_timestamp_embeddings(
     # pre-conditions
     assert len(audio.shape) == 2
 
+
+
+    # pad audio with silence
+    # ensures that events at start and end of input can be caught
+    input_sample_length = audio.shape[1]/model.sample_rate
+
+    pad_samples = int(((WINDOW_LENGTH/2.0)) * model.sample_rate)
+    samples = numpy.pad(numpy.array(audio),
+            pad_width=[(0, 0), (pad_samples, pad_samples)],
+            mode='constant', constant_values=0,
+    )
+    audio = samples
+
     # get embeddings for a single audio clip
     def get_embedding(samples):
-        scores, embeddings, spectrogram = model.yamnet_model(samples)
+        scores, spectrogram, embeddings  = model.yamnet_model.predict(samples, sr=model.sample_rate, hop_length=hop_size)
 
         ts = numpy.arange(embeddings.shape[0])*hop_size
         return embeddings, ts
@@ -68,6 +83,8 @@ def get_timestamp_embeddings(
     for sound_no in range(audio.shape[0]):
         samples = numpy.array(audio[sound_no, :])
         emb, ts = get_embedding(samples)
+        # HEAR needs timestamps in milliseconds
+        ts = ts * 1000.0
         embeddings.append(emb)
         timestamps.append(ts)
     emb = numpy.stack(embeddings)
@@ -84,12 +101,10 @@ def get_timestamp_embeddings(
     assert emb.shape[1] == ts.shape[1], (emb.shape, ts.shape)
     assert emb.shape[2] == model.timestamp_embedding_size
     if len(ts) >= 2:
-        assert ts[0,1] == ts[0,0] + hop_size
+        assert ts[0,0] >= 0.0, ts
+        assert ts[0,-1] <= (input_sample_length*1000.0), (ts, input_sample_length)
+        assert ts[0,1] == ts[0,0] + (hop_size*1000.0), ts
 
-    # XXX: are timestampes centered?
-    # first results seems to be 0.0, which would indicate that window
-    # starts at -window/2 ?
-    #assert ts[0] > 0.0 and ts[0] < hop_size, ts
     return (emb, ts)
 
 
