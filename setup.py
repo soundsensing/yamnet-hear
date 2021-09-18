@@ -34,7 +34,7 @@ setup(
     install_requires=read_requirements(),
     include_package_data=True,
     package_data = {
-        'yamnet': ['*.h5', '*.csv', '*.json'],
+        '': ['*.h5', '*.csv', '*.json'],
     },
     zip_safe=False,
 )
