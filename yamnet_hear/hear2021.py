@@ -9,6 +9,7 @@ https://neuralaudio.ai/hear2021-holistic-evaluation-of-audio-representations.htm
 HOP_SIZE_TIMESTAMPS = 0.050 # <50 ms recommended
 HOP_SIZE_SCENE = 0.5
 EMBEDDING_SIZE = 1024
+WINDOW_LENGTH = 0.960
 
 import numpy
 import tensorflow as tf
@@ -54,6 +55,19 @@ def get_timestamp_embeddings(
      """
     # pre-conditions
     assert len(audio.shape) == 2
+
+
+
+    # pad audio with silence
+    # ensures that events at start and end of input can be caught
+    input_sample_length = audio.shape[1]/model.sample_rate
+
+    pad_samples = int(((WINDOW_LENGTH/2.0)) * model.sample_rate)
+    samples = numpy.pad(numpy.array(audio),
+            pad_width=[(0, 0), (pad_samples, pad_samples)],
+            mode='constant', constant_values=0,
+    )
+    audio = samples
 
     # get embeddings for a single audio clip
     def get_embedding(samples):
