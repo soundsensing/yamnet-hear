@@ -69,7 +69,7 @@ def get_timestamp_embeddings(
             mode='constant', constant_values=0,
     )
     audio = samples
-f
+
     # get embeddings for a single audio clip
     def get_embedding(samples):
         scores, spectrogram, embeddings  = model.yamnet_model.predict(samples, sr=model.sample_rate, hop_length=hop_size)

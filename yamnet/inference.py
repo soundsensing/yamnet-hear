@@ -191,5 +191,3 @@ class Model:
         return scores, embeddings, metadata
 
 
-if __name__ == '__main__':
-    main(sys.argv[1:])
