@@ -36,5 +36,5 @@ setup(
     package_data = {
         'yamnet': ['*.h5', '*.csv', '*.json'],
     },
-    zip_safe=True,
+    zip_safe=False,
 )
