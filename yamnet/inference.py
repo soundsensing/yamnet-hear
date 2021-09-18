@@ -50,11 +50,6 @@ log = structlog.get_logger()
 class Model:
     def __init__(self, model_path=None, classmap_path=None):
 
-        log.debug("model-init",
-            module_path=here,
-            module_files=os.listdir(here),
-        )
-
         if classmap_path is None:
             self._classmap_path = os.path.join(here, 'yamnet_class_map.csv')
         else:
@@ -66,6 +61,11 @@ class Model:
             self._model_path = model_path
 
         self._load()
+
+        log.debug("yamnet-model-init",
+            module_path=here,
+            weights_path=self._model_path,
+        )
 
 
     def _load(self):
