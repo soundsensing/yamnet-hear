@@ -83,7 +83,6 @@ class Model:
         yamnet = self.yamnet
 
         # Compute exact splits
-        print(dir(params))
         n_windows = batch_seconds // hop_length
         batch_samples = n_windows * (hop_length * sr)
         assert int(batch_samples) == batch_samples
