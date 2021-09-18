@@ -9,6 +9,8 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8]
+    env:
+      PYTEST_ENABLE_SLOW: 1
 
     steps:
       - uses: actions/checkout@v2
