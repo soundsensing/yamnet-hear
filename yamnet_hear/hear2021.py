@@ -13,7 +13,8 @@ WINDOW_LENGTH = 0.960
 
 import numpy
 import tensorflow as tf
-import tensorflow_hub as hub
+
+import yamnet.inference
 
 #import tensorflow_datasets
 #from tensorflow_datasets.typing import Tensor
@@ -31,10 +32,10 @@ class Model(tf.Module):
 
 
 def load_model(model_file_path: str) -> Model:
+   
     # FIXME: respect model_file_path
 
-    yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')
-    model = Model(model=yamnet_model)
+    model = Model(yamnet.inference.Model())
     return model
 
 TimestampedEmbeddings = Tuple[Tensor, Tensor]
@@ -68,10 +69,10 @@ def get_timestamp_embeddings(
             mode='constant', constant_values=0,
     )
     audio = samples
-
+f
     # get embeddings for a single audio clip
     def get_embedding(samples):
-        scores, embeddings, spectrogram = model.yamnet_model(samples)
+        scores, spectrogram, embeddings  = model.yamnet_model.predict(samples, sr=model.sample_rate, hop_length=hop_size)
 
         ts = numpy.arange(embeddings.shape[0])*hop_size
         return embeddings, ts
