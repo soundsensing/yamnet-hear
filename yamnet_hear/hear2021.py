@@ -82,6 +82,8 @@ def get_timestamp_embeddings(
     for sound_no in range(audio.shape[0]):
         samples = numpy.array(audio[sound_no, :])
         emb, ts = get_embedding(samples)
+        # HEAR needs timestamps in milliseconds
+        ts = ts * 1000.0
         embeddings.append(emb)
         timestamps.append(ts)
     emb = numpy.stack(embeddings)
@@ -98,12 +100,10 @@ def get_timestamp_embeddings(
     assert emb.shape[1] == ts.shape[1], (emb.shape, ts.shape)
     assert emb.shape[2] == model.timestamp_embedding_size
     if len(ts) >= 2:
-        assert ts[0,1] == ts[0,0] + hop_size
+        assert ts[0,0] >= 0.0, ts
+        assert ts[0,-1] <= (input_sample_length*1000.0), (ts, input_sample_length)
+        assert ts[0,1] == ts[0,0] + (hop_size*1000.0), ts
 
-    # XXX: are timestampes centered?
-    # first results seems to be 0.0, which would indicate that window
-    # starts at -window/2 ?
-    #assert ts[0] > 0.0 and ts[0] < hop_size, ts
     return (emb, ts)
 
 
