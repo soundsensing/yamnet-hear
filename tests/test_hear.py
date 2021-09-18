@@ -2,6 +2,7 @@
 """Test the model using the HEAR2021 API"""
 
 import math
+import os
 
 import yamnet_hear as module
 import numpy
@@ -16,6 +17,7 @@ import pytest
 # SpeechCommands 
 
 TEST_WEIGHTS_PATH = 'unused'
+ENABLE_SLOW_TESTS = bool(int(os.environ.get('PYTEST_ENABLE_SLOW', '0')))
 
 def whitenoise_audio(sr=16000, duration=1.0, amplitude=1.0):
     n_samples = math.ceil(sr * duration)
@@ -41,7 +43,7 @@ def test_very_short_file():
     audio = tf.convert_to_tensor(audio)
     emb = module.get_scene_embeddings(audio=audio, model=model)
 
-@pytest.mark.skip('very slow')
+@pytest.mark.skipif(not ENABLE_SLOW_TESTS, reason='slow tests not enabled')
 def test_very_long_file():
     # up to 20 minutes can be provided in challenge
     # note, takes several minutes to process on CPU
