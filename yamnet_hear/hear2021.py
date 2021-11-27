@@ -6,10 +6,10 @@ As per specifications in
 https://neuralaudio.ai/hear2021-holistic-evaluation-of-audio-representations.html
 """
 
-HOP_SIZE_TIMESTAMPS = 0.050 # <50 ms recommended
-HOP_SIZE_SCENE = 0.5
-EMBEDDING_SIZE = 1024
 WINDOW_LENGTH = 0.960
+EMBEDDING_SIZE = 1024
+HOP_SIZE_TIMESTAMPS = 0.050 # <50 ms recommended
+HOP_SIZE_SCENE = WINDOW_LENGTH/2
 
 import numpy
 import tensorflow as tf
