@@ -65,7 +65,7 @@ def get_timestamp_embeddings(
 
     pad_samples = int(((WINDOW_LENGTH/2.0)) * model.sample_rate)
     samples = numpy.pad(numpy.array(audio),
-            pad_width=[(0, 0), (pad_samples, pad_samples)],
+            pad_width=[(0, 0), (pad_samples//2, pad_samples//2)],
             mode='constant', constant_values=0,
     )
     audio = samples
