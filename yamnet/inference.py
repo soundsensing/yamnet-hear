@@ -113,7 +113,7 @@ class Model:
 
                 cls, spec, emb = yamnet.predict(chunk, steps=1)
 
-                log.debug('yamnet-predict-chunk', shapes=(cls.shape, spec.shape, emb.shape))
+                log.debug('yamnet-predict-chunk-end', shapes=(cls.shape, spec.shape, emb.shape))
 
                 classes += [ cls ]
                 spectrogram += [ spec ]
