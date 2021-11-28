@@ -13,8 +13,11 @@ HOP_SIZE_SCENE = WINDOW_LENGTH/2
 
 import numpy
 import tensorflow as tf
+import structlog
 
 import yamnet.inference
+
+log = structlog.get_logger()
 
 #import tensorflow_datasets
 #from tensorflow_datasets.typing import Tensor
@@ -91,6 +94,18 @@ def get_timestamp_embeddings(
     ts = numpy.stack(timestamps)
     emb = tf.convert_to_tensor(emb)
     ts = tf.convert_to_tensor(ts)
+
+    last_timestep = None
+    if len(ts) >= 2:
+        last_timestep = float(ts[0,-1])
+
+    log.debug('get-timestamp-embeddings-end',
+        last_timestep=last_timestep,
+        input_duration=(input_sample_length*1000.0),
+        padded_duration=audio.shape[1]/model.sample_rate,
+        timesteps=emb.shape[1],
+        #timesteps=emb.shape[1],
+    )
     
     # post-conditions
     assert len(ts.shape) == 2 
@@ -102,7 +117,7 @@ def get_timestamp_embeddings(
     assert emb.shape[2] == model.timestamp_embedding_size
     if len(ts) >= 2:
         assert ts[0,0] >= 0.0, ts
-        assert ts[0,-1] <= (input_sample_length*1000.0), (ts, input_sample_length)
+        assert last_timestep <= (input_sample_length*1000.0), (ts, input_sample_length)
         assert ts[0,1] == ts[0,0] + (hop_size*1000.0), ts
 
     return (emb, ts)
